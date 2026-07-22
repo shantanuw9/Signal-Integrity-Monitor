@@ -23,9 +23,9 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
+  ui[0]: "sample_valid"
+  ui[1]: "cfg_sel"
+  ui[2]: "cfg_strobe"
   ui[3]: ""
   ui[4]: ""
   ui[5]: ""
@@ -33,10 +33,10 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
+  uo[0]: "deadline_miss"
+  uo[1]: "jitter_fault"
+  uo[2]: "system_ready"
+  uo[3]: "bist_fail"
   uo[4]: ""
   uo[5]: ""
   uo[6]: ""
