@@ -9,12 +9,12 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-Explain how your project works
+This project uses counters and FSMs to check if a signal from a sensor is polling properly. Sensor timing can be crucial, so it is important that a tool works properly within a configuration window before use.
 
 ## How to test
 
-Explain how to use your project
+There are testbenches that can be run using a waveform viewer.
 
 ## External hardware
 
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+No external hardware is used.
