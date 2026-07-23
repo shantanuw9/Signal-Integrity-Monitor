@@ -9,7 +9,6 @@ module jitter_tracker (
     output reg jitter_fault
 );
 
-reg [15:0] last_count;
 reg [15:0] counter;
 wire [15:0] expected;
 wire [15:0] delta;
@@ -21,7 +20,6 @@ always @(posedge clk) begin
     jitter_fault <= 1'b0;
     if(!rst_n) begin
         counter <= 16'b0;
-        last_count <= 16'b0;
     end else if(sample_valid) begin
         if(delta > {cfg_jitter_thresh, 10'b0}) begin
             jitter_fault <= 1'b1;
