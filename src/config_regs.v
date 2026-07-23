@@ -15,11 +15,11 @@ always @(posedge clk) begin
         cfg_window <= 6'd20;
         cfg_jitter_thresh <= 6'd5;
     end else if (cfg_strobe) begin
-            if (!cfg_sel)
-                cfg_window        <= cfg_data;
-            else
-                cfg_jitter_thresh <= cfg_data;
-        end
+        if (!cfg_sel)
+            cfg_window <= cfg_data;
+        else
+            cfg_jitter_thresh <= cfg_data;
+    end
 end
 
 endmodule
