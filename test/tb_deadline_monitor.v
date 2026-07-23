@@ -10,15 +10,15 @@ reg [5:0] cfg_window;
 wire deadline_miss;
 
 deadline_monitor dut (
-        .clk (clk),
-        .rst_n (rst_n),
-        .sample_valid (sample_valid),
-        .cfg_window (cfg_window),
-        .deadline_miss (deadline_miss)
+    .clk (clk),
+    .rst_n (rst_n),
+    .sample_valid (sample_valid),
+    .cfg_window (cfg_window),
+    .deadline_miss (deadline_miss)
 );
 
 initial clk = 0;
-always #5 clk = -clk;
+always #5 clk = ~clk;
 
 //Waveforms
 initial begin
@@ -28,7 +28,7 @@ end
 
 integer fail_count = 0;
 
-task check (input expected, input [63:0] test_id)
+task check (input expected, input [63:0] test_id);
     begin
         if (deadline_miss !== expected) begin
             $display("FAIL test %0d: expected deadline_miss=%b, got %b at time %0t",
@@ -49,7 +49,7 @@ task send_pulse;
     end
 endtask
 
-task wait_cycles (input integer n)
+task wait_cycles (input integer n);
     begin
         repeat(n) begin
             @(posedge clk);
