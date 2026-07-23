@@ -23,15 +23,15 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: "sample_valid"
-  ui[1]: "cfg_sel"
-  ui[2]: "cfg_strobe"
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
-
+  ui[0]: "sample_valid / cfg_data[0]"
+  ui[1]: "cfg_data[1]"
+  ui[2]: "cfg_data[2]"
+  ui[3]: "cfg_data[3]"
+  ui[4]: "cfg_data[4]"
+  ui[5]: "cfg_data[5]"
+  ui[6]: "cfg_sel"
+  ui[7]: "cfg_strobe"
+  
   # Outputs
   uo[0]: "deadline_miss"
   uo[1]: "jitter_fault"
