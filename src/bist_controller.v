@@ -22,7 +22,7 @@ reg good_clean;
 reg bad_triggered;
 reg [1:0] state;
 reg [1:0] pulse_count;
-reg pulse_bad_count;
+reg wait_cycle;
 
 always @(posedge clk) begin
         bist_pulse <= 1'b0;
@@ -30,13 +30,13 @@ always @(posedge clk) begin
             state <= INJECT_GOOD;
             counter <= 16'b0;
             pulse_count <= 2'b0;
-            pulse_bad_count <= 1'b0;
             good_clean <= 1'b1;
             bad_triggered <= 1'b0;
             bist_active <= 1'b1;
             bist_pulse <= 1'b0;
             system_ready <= 1'b0;
             bist_fail <= 1'b0;
+            wait_cycle <= 1'b0;
         end else begin
             case (state)
                 INJECT_GOOD: begin
@@ -56,14 +56,16 @@ always @(posedge clk) begin
                     if(deadline_miss) begin
                         bad_triggered <= 1'b1;
                     end
+                    if (wait_cycle) begin
+                        state <= VERIFY;
+                    end
                     if(counter > {cfg_window, 10'b0} << 1) begin
                         bist_pulse <= 1'b1;
                         counter <= 16'b0;
-                        pulse_bad_count <= 1'b1;
+                        wait_cycle  <= 1'b1;
                     end else begin
                         counter <= counter + 1'b1;
                     end
-                    state <= pulse_bad_count ? VERIFY : INJECT_BAD;
                 end
                 VERIFY: begin
                     if(good_clean && bad_triggered) begin

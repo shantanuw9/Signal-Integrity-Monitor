@@ -18,11 +18,15 @@ assign delta = (expected > counter) ? expected - counter : counter - expected;
 
 always @(posedge clk) begin
     jitter_fault <= 1'b0;
-    if(!rst_n) begin
+    if (!rst_n) begin
         counter <= 16'b0;
-    end else if(sample_valid) begin
-        if(delta > {cfg_jitter_thresh, 10'b0}) begin
-            jitter_fault <= 1'b1;
+    end else if (sample_valid) begin
+        if (counter > expected) begin
+            if (counter - expected > {cfg_jitter_thresh, 10'b0})
+                jitter_fault <= 1'b1;
+        end else begin
+            if (expected - counter > {cfg_jitter_thresh, 10'b0})
+                jitter_fault <= 1'b1;
         end
         counter <= 16'b0;
     end else begin
