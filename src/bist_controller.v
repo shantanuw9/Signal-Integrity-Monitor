@@ -17,7 +17,7 @@ localparam INJECT_BAD = 2'd1;
 localparam VERIFY = 2'd2;
 localparam DONE = 2'd3;
 
-reg [15:0] counter;
+reg [16:0] counter;
 reg [1:0] state;
 reg [1:0] pulse_count;
 reg [1:0] drain;
@@ -29,7 +29,7 @@ always @(posedge clk) begin
 
     if (!rst_n) begin
         state <= INJECT_GOOD;
-        counter <= 16'b0;
+        counter <= 17'b0;
         pulse_count <= 2'b0;
         drain <= 2'b0;
         good_clean <= 1'b1;
@@ -43,10 +43,9 @@ always @(posedge clk) begin
             INJECT_GOOD: begin
                 if (deadline_miss || jitter_fault)
                     good_clean <= 1'b0;
-
-                if (counter > {cfg_window, 10'b0}) begin
+                if (counter > {1'b0, cfg_window, 10'b0}) begin
                     bist_pulse  <= 1'b1;
-                    counter <= 16'b0;
+                    counter <= 17'b0; 
                     pulse_count <= pulse_count + 1'b1;
                 end else begin
                     counter <= counter + 1'b1;
@@ -64,9 +63,9 @@ always @(posedge clk) begin
                         state <= VERIFY;
                     else
                         drain <= drain + 1'b1;
-                end else if (counter >= ({cfg_window, 10'b0} << 1)) begin
+                end else if (counter >= ({1'b0, cfg_window, 10'b0} << 1)) begin
                     bist_pulse <= 1'b1;
-                    counter <= 16'b0;
+                    counter <= 17'b0;
                     drain <= 2'd1;
                 end else begin
                     counter <= counter + 1'b1;

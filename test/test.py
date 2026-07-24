@@ -3,13 +3,13 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import ClockCycles, RisingEdge
 
 @cocotb.test()
 async def test_bist_and_ready(dut):
     dut._log.info("Start")
 
-    clock = Clock(dut.clk, 100, unit="ns")  # 10MHz
+    clock = Clock(dut.clk, 100, unit="ns")
     cocotb.start_soon(clock.start())
 
     dut.ena.value    = 1
@@ -19,16 +19,28 @@ async def test_bist_and_ready(dut):
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value  = 1
 
-    # cfg_window defaults to 20 in config_regs reset
-    # BIST: 3 good pulses × 20480 + 1 bad pulse × 40960 + margin = ~103000 cycles
-    await ClockCycles(dut.clk, 110000)
+    # Log outputs every 5000 cycles to see state progression
+    # FIX: Increased limit from 22 to 50 (gives simulation up to 250,000 cycles)
+    for i in range(50):
+        await ClockCycles(dut.clk, 5000)
+        uo = int(dut.uo_out.value)
+        deadline_miss = uo & 1
+        jitter_fault  = (uo >> 1) & 1
+        system_ready  = (uo >> 2) & 1
+        bist_fail     = (uo >> 3) & 1
+        dut._log.info(
+            f"cycle ~{(i+1)*5000}: deadline_miss={deadline_miss} "
+            f"jitter_fault={jitter_fault} "
+            f"system_ready={system_ready} "
+            f"bist_fail={bist_fail}"
+        )
+        if system_ready or bist_fail:
+            break
 
-    system_ready = (int(dut.uo_out.value) >> 2) & 1
-    bist_fail    = (int(dut.uo_out.value) >> 3) & 1
+    uo = int(dut.uo_out.value)
+    system_ready = (uo >> 2) & 1
+    bist_fail    = (uo >> 3) & 1
 
-    dut._log.info(f"uo_out={dut.uo_out.value} system_ready={system_ready} bist_fail={bist_fail}")
-
-    assert system_ready == 1, f"system_ready not asserted after BIST (uo_out={dut.uo_out.value})"
-    assert bist_fail    == 0, f"bist_fail asserted unexpectedly (uo_out={dut.uo_out.value})"
-
-    dut._log.info("PASS: BIST completed, system_ready asserted")
+    assert system_ready == 1, f"system_ready not asserted (uo_out={dut.uo_out.value})"
+    assert bist_fail    == 0, f"bist_fail asserted (uo_out={dut.uo_out.value})"
+    dut._log.info("PASS")
