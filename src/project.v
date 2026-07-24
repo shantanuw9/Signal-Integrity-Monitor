@@ -14,8 +14,8 @@ module tt_um_shantanuw9 (
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     /* verilator lint_on UNUSEDSIGNAL */
-    input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+    input wire clk,      // clock
+    input wire rst_n     // reset_n - low to reset
 );
     // unused
     assign uio_out = 8'b0;

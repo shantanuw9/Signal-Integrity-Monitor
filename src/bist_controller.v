@@ -18,68 +18,74 @@ localparam VERIFY = 2'd2;
 localparam DONE = 2'd3;
 
 reg [15:0] counter;
-reg good_clean;
-reg bad_triggered;
 reg [1:0] state;
 reg [1:0] pulse_count;
-reg wait_cycle;
+reg [1:0] drain;
+reg good_clean;
+reg bad_triggered;
 
 always @(posedge clk) begin
+    bist_pulse <= 1'b0;
+
+    if (!rst_n) begin
+        state <= INJECT_GOOD;
+        counter <= 16'b0;
+        pulse_count <= 2'b0;
+        drain <= 2'b0;
+        good_clean <= 1'b1;
+        bad_triggered <= 1'b0;
+        bist_active <= 1'b1;
         bist_pulse <= 1'b0;
-        if (!rst_n) begin
-            state <= INJECT_GOOD;
-            counter <= 16'b0;
-            pulse_count <= 2'b0;
-            good_clean <= 1'b1;
-            bad_triggered <= 1'b0;
-            bist_active <= 1'b1;
-            bist_pulse <= 1'b0;
-            system_ready <= 1'b0;
-            bist_fail <= 1'b0;
-            wait_cycle <= 1'b0;
-        end else begin
-            case (state)
-                INJECT_GOOD: begin
-                    if(deadline_miss || jitter_fault) begin
-                        good_clean <= 0;
-                    end
-                    if(counter > {cfg_window, 10'b0}) begin
-                        bist_pulse <= 1'b1;
-                        counter <= 16'b0;
-                        pulse_count <= pulse_count + 1'b1;
-                    end else begin
-                        counter <= counter + 1'b1;
-                    end
-                    state <= pulse_count > 2'd2 ? INJECT_BAD : INJECT_GOOD;
+        system_ready <= 1'b0;
+        bist_fail <= 1'b0;
+    end else begin
+        case (state)
+            INJECT_GOOD: begin
+                if (deadline_miss || jitter_fault)
+                    good_clean <= 1'b0;
+
+                if (counter > {cfg_window, 10'b0}) begin
+                    bist_pulse  <= 1'b1;
+                    counter <= 16'b0;
+                    pulse_count <= pulse_count + 1'b1;
+                end else begin
+                    counter <= counter + 1'b1;
                 end
-                INJECT_BAD: begin
-                    if(deadline_miss) begin
-                        bad_triggered <= 1'b1;
-                    end
-                    if (wait_cycle) begin
+
+                state <= (pulse_count > 2'd2) ? INJECT_BAD : INJECT_GOOD;
+            end
+
+            INJECT_BAD: begin
+                if (deadline_miss)
+                    bad_triggered <= 1'b1;
+
+                if (drain > 2'd0) begin
+                    if (drain >= 2'd2)
                         state <= VERIFY;
-                    end
-                    if(counter > {cfg_window, 10'b0} << 1) begin
-                        bist_pulse <= 1'b1;
-                        counter <= 16'b0;
-                        wait_cycle  <= 1'b1;
-                    end else begin
-                        counter <= counter + 1'b1;
-                    end
+                    else
+                        drain <= drain + 1'b1;
+                end else if (counter >= ({cfg_window, 10'b0} << 1)) begin
+                    bist_pulse <= 1'b1;
+                    counter <= 16'b0;
+                    drain <= 2'd1;
+                end else begin
+                    counter <= counter + 1'b1;
                 end
-                VERIFY: begin
-                    if(good_clean && bad_triggered) begin
-                        system_ready <= 1'b1;
-                    end else begin
-                        bist_fail <= 1'b1;
-                    end
-                    state <= DONE;
-                end
-                DONE: begin
-                    bist_active <= 1'b0;
-                end
-            endcase
-        end
+            end
+
+            VERIFY: begin
+                if (good_clean && bad_triggered)
+                    system_ready <= 1'b1;
+                else
+                    bist_fail <= 1'b1;
+                state <= DONE;
+            end
+
+            DONE: begin
+                bist_active <= 1'b0;
+            end
+        endcase
     end
+end
 
 endmodule
