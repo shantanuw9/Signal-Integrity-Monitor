@@ -11,10 +11,8 @@ module jitter_tracker (
 
 reg [15:0] counter;
 wire [15:0] expected;
-wire [15:0] delta;
 
 assign expected = {cfg_window, 10'b0};
-assign delta = (expected > counter) ? expected - counter : counter - expected;
 
 always @(posedge clk) begin
     jitter_fault <= 1'b0;

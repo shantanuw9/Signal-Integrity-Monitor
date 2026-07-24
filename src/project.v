@@ -18,6 +18,8 @@ module tt_um_shantanuw9 (
     // unused
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
+    assign uio_in = 8'b0;
+    assign ena = 1'b1;
 
     // unpack inputs
     wire sample_valid_pin = ui_in[0];
