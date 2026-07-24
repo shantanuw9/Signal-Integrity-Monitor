@@ -24,6 +24,9 @@ reg [1:0] drain;
 reg good_clean;
 reg bad_triggered;
 
+// Calculate exact threshold limit for readability
+wire [16:0] window_threshold = {1'b0, cfg_window, 10'b0};
+
 always @(posedge clk) begin
     bist_pulse <= 1'b0;
 
@@ -41,11 +44,12 @@ always @(posedge clk) begin
     end else begin
         case (state)
             INJECT_GOOD: begin
+                // Any blip here ruins the BIST run
                 if (deadline_miss || jitter_fault)
                     good_clean <= 1'b0;
-                if (counter > {1'b0, cfg_window, 10'b0}) begin
+                if (counter + 1'b1 >= window_threshold) begin
                     bist_pulse  <= 1'b1;
-                    counter <= 17'b0; 
+                    counter <= 17'b0;
                     pulse_count <= pulse_count + 1'b1;
                 end else begin
                     counter <= counter + 1'b1;
@@ -63,7 +67,7 @@ always @(posedge clk) begin
                         state <= VERIFY;
                     else
                         drain <= drain + 1'b1;
-                end else if (counter >= ({1'b0, cfg_window, 10'b0} << 1)) begin
+                end else if (counter >= (window_threshold << 1)) begin
                     bist_pulse <= 1'b1;
                     counter <= 17'b0;
                     drain <= 2'd1;
