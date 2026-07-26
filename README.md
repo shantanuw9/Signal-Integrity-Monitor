@@ -21,7 +21,7 @@ causes orientation estimation drift. This chip catches that failure in the hardw
 
 ## Architecture
 
-![Block Diagram](docs/block_diagram.png)
+![Block Diagram](docs/Signal-Integrity-Monitor-BlockDiagram.png)
 
 The design consists of four modules:
 
